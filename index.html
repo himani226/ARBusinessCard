@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>MindSprout · AR Business Card</title>
+
+    <!-- Libraries -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&family=Orbitron:wght@700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- ✅ Styles -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- ✅ JS loaded first so AFRAME.registerComponent runs before a-scene parses -->
+    <script src="animation.js"></script>
+</head>
+
+<body>
+
+    <!-- HUD corners -->
+    <div class="hud tl" id="h1"></div>
+    <div class="hud tr" id="h2"></div>
+    <div class="hud bl" id="h3"></div>
+    <div class="hud br" id="h4"></div>
+
+    <!-- Toast notification -->
+    <div id="toast">✓ &nbsp; Card Detected</div>
+
+    <!-- Scan overlay -->
+    <div id="scan-overlay">
+        <div class="scan-frame">
+            <div class="sf-c tl"></div>
+            <div class="sf-c tr"></div>
+            <div class="sf-c bl"></div>
+            <div class="sf-c br"></div>
+        </div>
+        <div class="scan-title">Scan Your Card</div>
+        <div class="scan-sub">Point camera at MindSprout business card</div>
+    </div>
+
+    <!-- Speech bubble -->
+    <div id="speech-bubble">
+        <div class="sb-header">
+            <div class="sb-avatar-dot">🤖</div>
+            <div class="sb-name">AR Assistant</div>
+            <div class="sb-live">
+                <div class="sb-live-dot"></div>Speaking
+            </div>
+        </div>
+        <div class="sb-text" id="sb-text">
+            <span class="sb-cursor"></span>
+        </div>
+    </div>
+
+    <!-- Social dock (hidden until detected) -->
+    <div id="social-dock">
+
+        <div class="email-pill">
+            <i class="fas fa-envelope"></i>
+            <span>Email us : <strong>info@mindsprout.tech</strong></span>
+        </div>
+
+        <div class="button-block">
+
+            <div class="social li" id="soc-li">
+                <a href="https://www.linkedin.com/company/mindsprout-technologies/" target="_blank" rel="noopener">
+                    <img src="icons/linkedin.png" alt="LinkedIn" class="social-icon">
+                </a>
+                <span class="btn-label">LinkedIn</span>
+            </div>
+
+            <div class="social wa" id="soc-wa">
+                <a href="https://wa.me/918699102490" target="_blank" rel="noopener">
+                    <img src="icons/whatsapp.png" alt="WhatsApp" class="social-icon">
+                </a>
+                <span class="btn-label">WhatsApp</span>
+            </div>
+
+            <div class="social ig" id="soc-ig">
+                <a href="https://www.instagram.com/mindsprout.tech/" target="_blank" rel="noopener">
+                    <img src="icons/insta.png" alt="Instagram" class="social-icon">
+                </a>
+                <span class="btn-label">Instagram</span>
+            </div>
+
+            <div class="social web" id="soc-web">
+                <a href="https://www.mindsprout.tech" target="_blank" rel="noopener">
+                    <img src="icons/web.png" alt="Website" class="social-icon">
+                </a>
+                <span class="btn-label">Website</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════
+       A-FRAME AR SCENE
+  ═══════════════════════════ -->
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind;
+                autoStart: true;
+                uiLoading: no;
+                uiScanning: no;
+                uiError: no;
+                filterMinCF: 0.001;
+                filterBeta: 0.001;
+                missTolerance: 5;
+                warmupTolerance: 5;" color-space="sRGB" renderer="colorManagement: true;
+            physicallyCorrectLights: true;
+            antialias: true;
+            logarithmicDepthBuffer: true;" vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false">
+
+        <a-assets timeout="20000">
+            <a-asset-item id="avatarModel" src="./avatar.glb" crossorigin="anonymous"></a-asset-item>
+            <a-asset-item id="companyModel" src="./companyLogo.glb" crossorigin="anonymous"></a-asset-item>
+            <img id="panelImg" src="./panel2.jpeg" crossorigin="anonymous">
+            <video id="panelVideo" src="./CardVideo.mov" crossorigin="anonymous" autoplay loop muted playsinline
+                preload="auto">
+            </video>
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <!-- Lighting -->
+        <a-light type="ambient" color="#ffffff" intensity="0.9"></a-light>
+        <a-light type="directional" color="#ffffff" intensity="0.8" position="0.5 3 2"></a-light>
+        <a-light type="directional" color="#a66fff" intensity="1.4" position="-1 2 -1"></a-light>
+        <a-light type="point" color="#611ccf" intensity="1.2" distance="2" position="0 0.2 0.1"></a-light>
+
+        <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
+
+            <a-text id="speech-3d-text" value="Welcome to MindSprout" align="center" color="#a66fff" width="2"
+                position="0 0.6 0.01"></a-text>
+
+            <!-- AVATAR -->
+            <a-entity id="avatar-grp" scale="0.2 0.2 0.2" position="0 0 0" rotation="0 -60 0">
+                <a-entity id="avatar-mesh" gltf-model="#avatarModel" scale="0.55 0.55 0.55" rotation="0 0 0"
+                    animation-mixer="clip: *; loop: repeat; clampWhenFinished: false" procedural-talk="active: false">
+                </a-entity>
+            </a-entity>
+
+            <!--Text above left panel-->
+            <a-text id="speech-3d-text" value="Your Daily Partner in Growth" align="center" color="#119759" width="1"
+            position="-0.3 0.30 0.05"></a-text>
+
+
+            <!-- Comapny Logo-->
+        
+            <a-entity id="company-entity" gltf-model="#companyModel" scale="0.2 0.2 0.2" position="0.3 0.28 0.05" 
+                animation__spin="property:rotation; from:0 0 0; to:0 -360 0; dur:7000; easing:linear; loop:true">
+            </a-entity>
+
+            <!-- LEFT PANEL — Static Image -->
+            <a-entity id="panel-left" scale="0 0 0" position="-0.3 0.08 0.05" rotation="0 22 0">
+                <a-plane width="0.44" height="0.30"
+                    material="color:#0a0418;opacity:0.75;transparent:true;roughness:0.1;metalness:0.5"></a-plane>
+                <a-plane width="0.455" height="0.315" position="0 0 -0.002"
+                    material="color:#a66fff;opacity:0.7;transparent:true;wireframe:true"></a-plane>
+                <a-plane width="0.44" height="0.022" position="0 0.16 0.001"
+                    material="color:#611ccf;opacity:0.9;transparent:true"></a-plane>
+                <a-text value="Our Place" position="0 0.161 0.003" scale="0.065 0.065 0.065" color="#ffffff"
+                    align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+                <a-plane width="0.42" height="0.24" position="0 -0.01 0.003" src="#panelImg"
+                    material="shader:flat;transparent:false"></a-plane>
+                <a-sphere position="-0.22  0.15 0.004" radius="0.007"
+                    material="color:#a66fff;emissive:#a66fff;emissiveIntensity:2"></a-sphere>
+                <a-sphere position=" 0.22  0.15 0.004" radius="0.007"
+                    material="color:#a66fff;emissive:#a66fff;emissiveIntensity:2"></a-sphere>
+                <a-sphere position="-0.22 -0.15 0.004" radius="0.007"
+                    material="color:#a66fff;emissive:#a66fff;emissiveIntensity:2"></a-sphere>
+                <a-sphere position=" 0.22 -0.15 0.004" radius="0.007"
+                    material="color:#a66fff;emissive:#a66fff;emissiveIntensity:2"></a-sphere>
+                <a-light type="point" color="#611ccf" intensity="0.6" distance="0.5" position="0 0 -0.05"></a-light>
+            </a-entity>
+            
+            <!-- RIGHT PANEL — Video -->
+            <a-entity id="panel-right" scale="0 0 0" position="0.3 0.08 0.05" rotation="0 -22 0">
+                <a-plane width="0.44" height="0.30"
+                    material="color:#0a0418;opacity:0.75;transparent:true;roughness:0.1;metalness:0.5"></a-plane>
+                <a-plane width="0.455" height="0.315" position="0 0 -0.002"
+                    material="color:#00e5ff;opacity:0.6;transparent:true;wireframe:true"></a-plane>
+                <a-plane width="0.44" height="0.022" position="0 0.16 0.001"
+                    material="color:#005577;opacity:0.9;transparent:true"></a-plane>
+                <a-text value="About Us" position="0 0.161 0.003" scale="0.065 0.065 0.065" color="#ffffff"
+                    align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+                <a-plane width="0.42" height="0.24" position="0 -0.01 0.003"
+                    material="shader:flat;src:#panelVideo;transparent:false"></a-plane>
+                <a-plane width="0.10" height="0.028" position="0.165 0.145 0.005"
+                    material="color:#00cc55;opacity:0.85;transparent:true"></a-plane>
+                <a-text value="▶ LIVE" position="0.165 0.145 0.007" scale="0.042 0.042 0.042" color="#ffffff"
+                    align="center"></a-text>
+                <a-sphere position="-0.22  0.15 0.004" radius="0.007"
+                    material="color:#00e5ff;emissive:#00e5ff;emissiveIntensity:2"></a-sphere>
+                <a-sphere position=" 0.22  0.15 0.004" radius="0.007"
+                    material="color:#00e5ff;emissive:#00e5ff;emissiveIntensity:2"></a-sphere>
+                <a-sphere position="-0.22 -0.15 0.004" radius="0.007"
+                    material="color:#00e5ff;emissive:#00e5ff;emissiveIntensity:2"></a-sphere>
+                <a-sphere position=" 0.22 -0.15 0.004" radius="0.007"
+                    material="color:#00e5ff;emissive:#00e5ff;emissiveIntensity:2"></a-sphere>
+                <a-light type="point" color="#00aaff" intensity="0.6" distance="0.5" position="0 0 -0.05"></a-light>
+            </a-entity>
+
+        </a-entity>
+    </a-scene>
+
+</body>
+
+</html>
