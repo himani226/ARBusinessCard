@@ -430,7 +430,7 @@ body {
 /* Button row */
 .button-block {
   display: flex;
-  gap: 42px;
+  gap:20px;
   align-items: center;
   justify-content: center;
 }
