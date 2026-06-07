@@ -7,7 +7,7 @@
 /* ══════════════════════════════════════════
    CONFIG — edit speech text and links here
 ══════════════════════════════════════════ */
-const SPEECH_TEXT  = "Hi! Welcome to MindSprout Technologies. I'm your AR assistant, here to guide you through our world of augmented reality, AI, and digital innovation!";
+const SPEECH_TEXT = "Hi! Welcome to MindSprout Technologies. I'm your AR assistant, here to guide you through our world of augmented reality, AI, and digital innovation! Providing Services like Expert Talk, AI Solutions, Trainings, Web Development, AR/VR Solutions and more";
 const SPEECH_SPEED = 35; // ms per character
 
 /* ══════════════════════════════════════════
@@ -24,12 +24,12 @@ AFRAME.registerComponent('procedural-talk', {
       if (!mesh) return;
       mesh.traverse(node => {
         const n = (node.name || '').toLowerCase();
-        if (n.includes('head'))                            this.bones.head = node;
-        if (n.includes('neck'))                            this.bones.neck = node;
-        if (n.includes('l_upperarm') || n.includes('leftarm'))  this.bones.lUp  = node;
-        if (n.includes('r_upperarm') || n.includes('rightarm')) this.bones.rUp  = node;
-        if (n.includes('l_forearm'))                       this.bones.lFo  = node;
-        if (n.includes('r_forearm'))                       this.bones.rFo  = node;
+        if (n.includes('head')) this.bones.head = node;
+        if (n.includes('neck')) this.bones.neck = node;
+        if (n.includes('l_upperarm') || n.includes('leftarm')) this.bones.lUp = node;
+        if (n.includes('r_upperarm') || n.includes('rightarm')) this.bones.rUp = node;
+        if (n.includes('l_forearm')) this.bones.lFo = node;
+        if (n.includes('r_forearm')) this.bones.rFo = node;
       });
     });
   },
@@ -53,9 +53,9 @@ AFRAME.registerComponent('procedural-talk', {
     }
     if (b.rUp) {
       b.rUp.rotation.x = -0.5 + Math.cos(t * 2.0) * 0.18;
-      b.rUp.rotation.z =  0.3 + Math.sin(t * 1.8) * 0.12;
+      b.rUp.rotation.z = 0.3 + Math.sin(t * 1.8) * 0.12;
     }
-    if (b.lFo) b.lFo.rotation.y =  Math.sin(t * 2.9) * 0.22;
+    if (b.lFo) b.lFo.rotation.y = Math.sin(t * 2.9) * 0.22;
     if (b.rFo) b.rFo.rotation.y = -Math.cos(t * 2.6) * 0.22;
   }
 });
@@ -67,9 +67,9 @@ function playScanBeep() {
   try {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
-    const ctx  = new AC();
-    const o1   = ctx.createOscillator();
-    const o2   = ctx.createOscillator();
+    const ctx = new AC();
+    const o1 = ctx.createOscillator();
+    const o2 = ctx.createOscillator();
     const gain = ctx.createGain();
 
     o1.type = 'sine';
@@ -87,7 +87,7 @@ function playScanBeep() {
     o1.start(); o2.start();
     o1.stop(ctx.currentTime + 0.4);
     o2.stop(ctx.currentTime + 0.4);
-  } catch (e) {}
+  } catch (e) { }
 }
 
 /* ══════════════════════════════════════════
@@ -102,15 +102,15 @@ function speak(text) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
 
-  const utt   = new SpeechSynthesisUtterance(text);
-  utt.rate    = 1.0;
-  utt.pitch   = 1.1;
-  utt.volume  = 1;
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 1.0;
+  utt.pitch = 1.1;
+  utt.volume = 1;
 
   const voices = window.speechSynthesis.getVoices();
-  const voice  = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google'))
-              || voices.find(v => v.lang.startsWith('en'))
-              || voices[0];
+  const voice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google'))
+    || voices.find(v => v.lang.startsWith('en'))
+    || voices[0];
   if (voice) utt.voice = voice;
 
   window.speechSynthesis.speak(utt);
@@ -148,11 +148,11 @@ function springIn(elId, targetScale, delay) {
     const el = document.getElementById(elId);
     if (!el) return;
     el.setAttribute('animation__si', {
-      property:    'scale',
-      to:          targetScale,
-      dur:         700,
-      easing:      'easeOutElastic',
-      elasticity:  380
+      property: 'scale',
+      to: targetScale,
+      dur: 700,
+      easing: 'easeOutElastic',
+      elasticity: 380
     });
   }, delay);
 }
@@ -179,7 +179,7 @@ function tryPlayVideo() {
   const vid = document.getElementById('panelVideo');
   if (vid) {
     vid.muted = true;
-    vid.play().catch(() => {});
+    vid.play().catch(() => { });
   }
 }
 
@@ -216,11 +216,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let detected = false;
 
-  const huds    = ['h1', 'h2', 'h3', 'h4'].map(id => document.getElementById(id));
+  const huds = ['h1', 'h2', 'h3', 'h4'].map(id => document.getElementById(id));
   const overlay = document.getElementById('scan-overlay');
-  const bubble  = document.getElementById('speech-bubble');
+  const bubble = document.getElementById('speech-bubble');
   const arTarget = document.getElementById('ar-target');
-  const scene    = document.querySelector('a-scene');
+  const scene = document.querySelector('a-scene');
 
   /* ── AR target found ── */
   arTarget.addEventListener('targetFound', () => {
@@ -243,9 +243,9 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast();
 
     // 4. A-Frame spring-ins (staggered)
-    springIn('avatar-grp',  '1 1 1',  200);
-    springIn('panel-left',  '1 1 1',  550);
-    springIn('panel-right', '1 1 1',  750);
+    springIn('avatar-grp', '1 1 1', 200);
+    springIn('panel-left', '1 1 1', 550);
+    springIn('panel-right', '1 1 1', 750);
 
     // 5. Social dock
     setTimeout(showSocialDock, 950);
