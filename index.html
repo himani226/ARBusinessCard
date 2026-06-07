@@ -136,45 +136,49 @@
         <a-light type="point" color="#611ccf" intensity="1.2" distance="2" position="0 0.2 0.1"></a-light>
 
         <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
+            <!-- ✅ Single wrapper — pinch scales everything together -->
+            <a-entity id="ar-content" pinch-scale="min: 0.3; max: 3.0">
 
-            <a-text id="speech-3d-text" value="Welcome to MindSprout" align="center" color="#7D38BC" width="2"
-                position="0 0.6 0.01"></a-text>
+                <a-text id="speech-3d-text" value="Welcome to MindSprout" align="center" color="#7D38BC" width="2"
+                    position="0 0.6 0.01"></a-text>
 
-            <!-- AVATAR -->
-            <a-entity id="avatar-grp" scale="0.2 0.2 0.2" position="0 0 0" rotation="0 -60 0">
-                <a-entity id="avatar-mesh" gltf-model="#avatarModel" scale="0.55 0.55 0.55" rotation="0 0 0"
-                    animation-mixer="clip: *; loop: repeat; clampWhenFinished: false" procedural-talk="active: false">
+                <!-- AVATAR -->
+                <a-entity id="avatar-grp" scale="0.2 0.2 0.2" position="0 0 0" rotation="0 -60 0">
+                    <a-entity id="avatar-mesh" gltf-model="#avatarModel" scale="0.55 0.55 0.55" rotation="0 0 0"
+                        animation-mixer="clip: *; loop: repeat; clampWhenFinished: false"
+                        procedural-talk="active: false">
+                    </a-entity>
                 </a-entity>
-            </a-entity>
 
-            <!-- STAGE -->
-            <a-entity id="stage-entity" gltf-model="#stageModel" scale="0.2 0.2 0.2" position="0 -0.035 0" rotation="0 0 0">
-            </a-entity>
+                <!-- STAGE -->
+                <a-entity id="stage-entity" gltf-model="#stageModel" scale="0.2 0.2 0.2" position="0 -0.035 0"
+                    rotation="0 0 0">
+                </a-entity>
 
-            <!-- Comapny Logo-->
-        
-            <a-entity id="company-entity" gltf-model="#companyModel" scale="0.2 0.2 0.2" position="0.3 0.08 0.05" 
-                animation__spin="property:rotation; from:0 0 0; to:0 -360 0; dur:7000; easing:linear; loop:true">
-            </a-entity>
+                <!-- Comapny Logo-->
 
-            <!-- LEFT PANEL — Static Image -->
-            <a-entity id="panel-left" scale="0 0 0" position="-0.3 0.07 0.05" rotation="0 22 0">
-                <a-plane width="0.44" height="0.30"
-                    material="color:#0a0418;opacity:0.75;transparent:true;roughness:0.1;metalness:0.5"></a-plane>
-                <a-plane width="0.455" height="0.315" position="0 0 -0.002"
-                    material="color:#a66fff;opacity:0.7;transparent:true;wireframe:true"></a-plane>
-                <a-plane width="0.44" height="0.022" position="0 0.16 0.001"
-                    material="color:#611ccf;opacity:0.9;transparent:true"></a-plane>
-                <a-text value="Our Place" position="0 0.161 0.003" scale="0.065 0.065 0.065" color="#ffffff"
-                    align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
-                <a-plane width="0.42" height="0.24" position="0 -0.01 0.003" src="#panelImg"
-                    material="shader:flat;transparent:false"></a-plane>
-                
-                <a-light type="point" color="#611ccf" intensity="0.6" distance="0.5" position="0 0 -0.05"></a-light>
-            </a-entity>
-            
-            <!-- RIGHT PANEL — Video -->
-            <!-- <a-entity id="panel-right" scale="0 0 0" position="0.3 0.07 0.05" rotation="0 -22 0">
+                <a-entity id="company-entity" gltf-model="#companyModel" scale="0.2 0.2 0.2" position="0.3 0.08 0.05"
+                    animation__spin="property:rotation; from:0 0 0; to:0 -360 0; dur:7000; easing:linear; loop:true">
+                </a-entity>
+
+                <!-- LEFT PANEL — Static Image -->
+                <a-entity id="panel-left" scale="0 0 0" position="-0.3 0.07 0.05" rotation="0 22 0">
+                    <a-plane width="0.44" height="0.30"
+                        material="color:#0a0418;opacity:0.75;transparent:true;roughness:0.1;metalness:0.5"></a-plane>
+                    <a-plane width="0.455" height="0.315" position="0 0 -0.002"
+                        material="color:#a66fff;opacity:0.7;transparent:true;wireframe:true"></a-plane>
+                    <a-plane width="0.44" height="0.022" position="0 0.16 0.001"
+                        material="color:#611ccf;opacity:0.9;transparent:true"></a-plane>
+                    <a-text value="Our Place" position="0 0.161 0.003" scale="0.065 0.065 0.065" color="#ffffff"
+                        align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+                    <a-plane width="0.42" height="0.24" position="0 -0.01 0.003" src="#panelImg"
+                        material="shader:flat;transparent:false"></a-plane>
+
+                    <a-light type="point" color="#611ccf" intensity="0.6" distance="0.5" position="0 0 -0.05"></a-light>
+                </a-entity>
+
+                <!-- RIGHT PANEL — Video -->
+                <!-- <a-entity id="panel-right" scale="0 0 0" position="0.3 0.07 0.05" rotation="0 -22 0">
                 <a-plane width="0.44" height="0.30"
                     material="color:#0a0418;opacity:0.75;transparent:true;roughness:0.1;metalness:0.5"></a-plane>
                 <a-plane width="0.455" height="0.315" position="0 0 -0.002"
@@ -200,6 +204,7 @@
                 <a-light type="point" color="#00aaff" intensity="0.6" distance="0.5" position="0 0 -0.05"></a-light>
             </a-entity> -->
 
+            </a-entity>
         </a-entity>
     </a-scene>
 

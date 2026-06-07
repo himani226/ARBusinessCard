@@ -11,6 +11,89 @@ const SPEECH_TEXT = "Hi! Welcome to MindSprout Technologies. I'm your AR assista
 const SPEECH_SPEED = 35; // ms per character
 
 /* ══════════════════════════════════════════
+   COMPONENT — pinch-scale
+   Pinch two fingers to zoom in/out on mobile.
+   Scroll wheel to zoom on desktop.
+   Applied to the #ar-content wrapper group.
+══════════════════════════════════════════ */
+AFRAME.registerComponent('pinch-scale', {
+  schema: {
+    min:   { default: 0.3 },   // minimum scale limit
+    max:   { default: 3.0 },   // maximum scale limit
+    speed: { default: 1.0 }    // sensitivity
+  },
+
+  init() {
+    this.scaleFactor = 1.0;
+    this.lastDist    = null;
+
+    // Bind handlers so removeEventListener works
+    this._onTouchStart = this._onTouchStart.bind(this);
+    this._onTouchMove  = this._onTouchMove.bind(this);
+    this._onTouchEnd   = this._onTouchEnd.bind(this);
+    this._onWheel      = this._onWheel.bind(this);
+
+    window.addEventListener('touchstart', this._onTouchStart, { passive: true });
+    window.addEventListener('touchmove',  this._onTouchMove,  { passive: true });
+    window.addEventListener('touchend',   this._onTouchEnd,   { passive: true });
+    window.addEventListener('wheel',      this._onWheel,      { passive: true });
+  },
+
+  _getDist(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  },
+
+  _applyScale() {
+    const s = this.scaleFactor;
+    this.el.setAttribute('scale', `${s} ${s} ${s}`);
+  },
+
+  _onTouchStart(e) {
+    if (e.touches.length === 2) {
+      this.lastDist = this._getDist(e.touches);
+    }
+  },
+
+  _onTouchMove(e) {
+    if (e.touches.length !== 2 || this.lastDist === null) return;
+
+    const dist  = this._getDist(e.touches);
+    const delta = dist / this.lastDist;
+    this.lastDist = dist;
+
+    this.scaleFactor = Math.min(
+      this.data.max,
+      Math.max(this.data.min, this.scaleFactor * delta * this.data.speed)
+    );
+    this._applyScale();
+  },
+
+  _onTouchEnd(e) {
+    if (e.touches.length < 2) this.lastDist = null;
+  },
+
+  _onWheel(e) {
+    // Desktop scroll wheel zoom
+    const delta = e.deltaY > 0 ? 0.95 : 1.05;
+    this.scaleFactor = Math.min(
+      this.data.max,
+      Math.max(this.data.min, this.scaleFactor * delta)
+    );
+    this._applyScale();
+  },
+
+  remove() {
+    window.removeEventListener('touchstart', this._onTouchStart);
+    window.removeEventListener('touchmove',  this._onTouchMove);
+    window.removeEventListener('touchend',   this._onTouchEnd);
+    window.removeEventListener('wheel',      this._onWheel);
+  }
+});
+
+
+/* ══════════════════════════════════════════
    A-FRAME COMPONENT — procedural-talk
    Drives avatar bone animations while speaking
 ══════════════════════════════════════════ */
