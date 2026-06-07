@@ -354,6 +354,12 @@ document.addEventListener('DOMContentLoaded', () => {
   arTarget.addEventListener('targetLost', () => {
     // Dim HUD corners — keep everything else visible
     huds.forEach(h => h.classList.remove('on'));
+    // Keep all 3D content visible after first detection
+  if (detected) {
+    requestAnimationFrame(() => {
+      arTarget.object3D.visible = true;
+    });
+  }
   });
 
   /* ── A-Frame scene loaded ── */
