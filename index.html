@@ -132,12 +132,12 @@
         <!-- Lighting -->
         <a-light type="ambient" color="#ffffff" intensity="0.9"></a-light>
         <a-light type="directional" color="#ffffff" intensity="0.8" position="0.5 3 2"></a-light>
-        <a-light type="directional" color="#a66fff" intensity="1.4" position="-1 2 -1"></a-light>
+        <a-light type="directional" color="#1b3780" intensity="1.4" position="-1 2 -1"></a-light>
         <a-light type="point" color="#611ccf" intensity="1.2" distance="2" position="0 0.2 0.1"></a-light>
 
         <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
 
-            <a-text id="speech-3d-text" value="Welcome to MindSprout" align="center" color="#a66fff" width="2"
+            <a-text id="speech-3d-text" value="Welcome to MindSprout" align="center" color="#1b3780" width="2"
                 position="0 0.6 0.01"></a-text>
 
             <!-- AVATAR -->
@@ -158,7 +158,7 @@
 
             <!-- Comapny Logo-->
         
-            <a-entity id="company-entity" gltf-model="#companyModel" scale="0.2 0.2 0.2" position="0.3 0.28 0.05" 
+            <a-entity id="company-entity" gltf-model="#companyModel" scale="0.2 0.2 0.2" position="0.3 0.08 0.05" 
                 animation__spin="property:rotation; from:0 0 0; to:0 -360 0; dur:7000; easing:linear; loop:true">
             </a-entity>
 
@@ -174,19 +174,12 @@
                     align="center" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
                 <a-plane width="0.42" height="0.24" position="0 -0.01 0.003" src="#panelImg"
                     material="shader:flat;transparent:false"></a-plane>
-                <a-sphere position="-0.22  0.15 0.004" radius="0.007"
-                    material="color:#a66fff;emissive:#a66fff;emissiveIntensity:2"></a-sphere>
-                <a-sphere position=" 0.22  0.15 0.004" radius="0.007"
-                    material="color:#a66fff;emissive:#a66fff;emissiveIntensity:2"></a-sphere>
-                <a-sphere position="-0.22 -0.15 0.004" radius="0.007"
-                    material="color:#a66fff;emissive:#a66fff;emissiveIntensity:2"></a-sphere>
-                <a-sphere position=" 0.22 -0.15 0.004" radius="0.007"
-                    material="color:#a66fff;emissive:#a66fff;emissiveIntensity:2"></a-sphere>
+                
                 <a-light type="point" color="#611ccf" intensity="0.6" distance="0.5" position="0 0 -0.05"></a-light>
             </a-entity>
             
             <!-- RIGHT PANEL — Video -->
-            <a-entity id="panel-right" scale="0 0 0" position="0.3 0.07 0.05" rotation="0 -22 0">
+            <!-- <a-entity id="panel-right" scale="0 0 0" position="0.3 0.07 0.05" rotation="0 -22 0">
                 <a-plane width="0.44" height="0.30"
                     material="color:#0a0418;opacity:0.75;transparent:true;roughness:0.1;metalness:0.5"></a-plane>
                 <a-plane width="0.455" height="0.315" position="0 0 -0.002"
@@ -210,7 +203,7 @@
                 <a-sphere position=" 0.22 -0.15 0.004" radius="0.007"
                     material="color:#00e5ff;emissive:#00e5ff;emissiveIntensity:2"></a-sphere>
                 <a-light type="point" color="#00aaff" intensity="0.6" distance="0.5" position="0 0 -0.05"></a-light>
-            </a-entity>
+            </a-entity> -->
 
         </a-entity>
     </a-scene>
