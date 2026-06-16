@@ -7,8 +7,17 @@
 /* ══════════════════════════════════════════
    CONFIG — edit speech text and links here
 ══════════════════════════════════════════ */
-const SPEECH_TEXT = "Hi! Welcome to MindSprout Technologies. I'm your AR assistant, here to guide you through our world of augmented reality, AI, and digital innovation! Providing Services like Expert Talk, AI Solutions, Trainings, Web Development, AR/VR Solutions and more";
-const SPEECH_SPEED = 35; // ms per character
+const WELCOME_MSG =
+  "Hey! Welcome to MindSprout Technologies. " +
+  "Now scan the logo of my company to " +
+  "experience the magic!";
+
+const SPEECH_TEXT =
+  "Hi! " +
+  "I'm your AR assistant, here to guide you " +
+  "through our world of AR, AI, and digital innovation!";
+
+const SPEECH_SPEED = 35;
 
 /* ══════════════════════════════════════════
    COMPONENT — pinch-scale
@@ -18,25 +27,25 @@ const SPEECH_SPEED = 35; // ms per character
 ══════════════════════════════════════════ */
 AFRAME.registerComponent('pinch-scale', {
   schema: {
-    min:   { default: 0.3 },   // minimum scale limit
-    max:   { default: 3.0 },   // maximum scale limit
+    min: { default: 0.3 },   // minimum scale limit
+    max: { default: 3.0 },   // maximum scale limit
     speed: { default: 1.0 }    // sensitivity
   },
 
   init() {
     this.scaleFactor = 1.0;
-    this.lastDist    = null;
+    this.lastDist = null;
 
     // Bind handlers so removeEventListener works
     this._onTouchStart = this._onTouchStart.bind(this);
-    this._onTouchMove  = this._onTouchMove.bind(this);
-    this._onTouchEnd   = this._onTouchEnd.bind(this);
-    this._onWheel      = this._onWheel.bind(this);
+    this._onTouchMove = this._onTouchMove.bind(this);
+    this._onTouchEnd = this._onTouchEnd.bind(this);
+    this._onWheel = this._onWheel.bind(this);
 
     window.addEventListener('touchstart', this._onTouchStart, { passive: true });
-    window.addEventListener('touchmove',  this._onTouchMove,  { passive: true });
-    window.addEventListener('touchend',   this._onTouchEnd,   { passive: true });
-    window.addEventListener('wheel',      this._onWheel,      { passive: true });
+    window.addEventListener('touchmove', this._onTouchMove, { passive: true });
+    window.addEventListener('touchend', this._onTouchEnd, { passive: true });
+    window.addEventListener('wheel', this._onWheel, { passive: true });
   },
 
   _getDist(touches) {
@@ -59,7 +68,7 @@ AFRAME.registerComponent('pinch-scale', {
   _onTouchMove(e) {
     if (e.touches.length !== 2 || this.lastDist === null) return;
 
-    const dist  = this._getDist(e.touches);
+    const dist = this._getDist(e.touches);
     const delta = dist / this.lastDist;
     this.lastDist = dist;
 
@@ -86,12 +95,39 @@ AFRAME.registerComponent('pinch-scale', {
 
   remove() {
     window.removeEventListener('touchstart', this._onTouchStart);
-    window.removeEventListener('touchmove',  this._onTouchMove);
-    window.removeEventListener('touchend',   this._onTouchEnd);
-    window.removeEventListener('wheel',      this._onWheel);
+    window.removeEventListener('touchmove', this._onTouchMove);
+    window.removeEventListener('touchend', this._onTouchEnd);
+    window.removeEventListener('wheel', this._onWheel);
   }
 });
 
+/* ══════════════════════════════════════════
+   COMPONENT — counter-tilt
+   Keeps ar-content upright regardless of
+   the angle the card is held at.
+   Add to #ar-content (child of #ar-target).
+══════════════════════════════════════════ */
+AFRAME.registerComponent('counter-tilt', {
+  init() {
+    this._euler = new THREE.Euler();
+  },
+
+  tick() {
+    const parent = this.el.parentEl;
+    if (!parent || !parent.object3D) return;
+
+    // Read parent's (ar-target) rotation
+    this._euler.setFromQuaternion(
+      parent.object3D.quaternion,
+      'YXZ'
+    );
+
+    // Apply inverse X and Z — content stays upright
+    // Y is left at 0 so content faces the correct direction
+    this.el.object3D.rotation.x = -this._euler.x;
+    this.el.object3D.rotation.z = -this._euler.z;
+  }
+});
 
 /* ══════════════════════════════════════════
    A-FRAME COMPONENT — procedural-talk
@@ -305,6 +341,72 @@ document.addEventListener('DOMContentLoaded', () => {
   const arTarget = document.getElementById('ar-target');
   const scene = document.querySelector('a-scene');
 
+  /* ══════════════════════════════════════════
+   WELCOME SCREEN — runs on page load
+══════════════════════════════════════════ */
+  /* ── Define startMindAR FIRST, before anything calls it ── */
+  function startMindAR() {
+    window.speechSynthesis && window.speechSynthesis.cancel();
+
+    const ws = document.getElementById('welcome-screen');
+    ws.classList.add('hide');
+    setTimeout(() => ws.style.display = 'none', 700);
+
+    const scene = document.querySelector('a-scene');
+    if (scene.hasLoaded) {
+      scene.systems['mindar-image-system'].start();
+    } else {
+      scene.addEventListener('loaded', () => {
+        scene.systems['mindar-image-system'].start();
+      }, { once: true });
+    }
+
+    const scanOverlay = document.getElementById('scan-overlay');
+    scanOverlay.style.display = 'flex';
+    scanOverlay.style.opacity = '1';
+  }
+
+  document.getElementById('ws-btn')
+    .addEventListener('click', startMindAR);
+
+  const wsText = document.getElementById('ws-text');
+  const wsBtn = document.getElementById('ws-btn');
+  const wsHint = document.getElementById('ws-hint');
+
+  // Start typewriter + TTS for welcome message
+  typewrite(WELCOME_MSG, 'ws-text', SPEECH_SPEED);
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const wsUtt = new SpeechSynthesisUtterance(WELCOME_MSG);
+    wsUtt.rate = 1.0;
+    wsUtt.pitch = 1.1;
+    wsUtt.volume = 1;
+
+    // When speech ends → show Scan button
+    wsUtt.onend = () => {
+      wsHint.textContent = 'Tap the button when ready';
+      wsBtn.style.display = 'block';
+    };
+
+    // Pre-load voices then speak
+    const trySpeak = () => {
+      const voices = window.speechSynthesis.getVoices();
+      const voice = voices.find(v =>
+        v.lang.startsWith('en') && v.name.includes('Google'))
+        || voices.find(v => v.lang.startsWith('en'))
+        || voices[0];
+      if (voice) wsUtt.voice = voice;
+      window.speechSynthesis.speak(wsUtt);
+    };
+
+    if (window.speechSynthesis.getVoices().length) {
+      trySpeak();
+    } else {
+      window.speechSynthesis.onvoiceschanged = trySpeak;
+    }
+  }
+
   /* ── AR target found ── */
   arTarget.addEventListener('targetFound', () => {
     // Light up HUD corners
@@ -355,11 +457,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dim HUD corners — keep everything else visible
     huds.forEach(h => h.classList.remove('on'));
     // Keep all 3D content visible after first detection
-  if (detected) {
-    requestAnimationFrame(() => {
-      arTarget.object3D.visible = true;
-    });
-  }
+    if (detected) {
+      requestAnimationFrame(() => {
+        arTarget.object3D.visible = true;
+      });
+    }
   });
 
   /* ── A-Frame scene loaded ── */
@@ -367,5 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Pre-fetch TTS voices
     if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
   });
+
+
 
 }); // end DOMContentLoaded

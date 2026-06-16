@@ -99,12 +99,58 @@
 
         </div>
     </div>
+    <!-- ══════════════════════════════
+     WELCOME SCREEN
+     Shows on QR scan, before AR starts
+══════════════════════════════ -->
+    <div id="welcome-screen">
+
+        <!-- Glowing ring behind avatar -->
+        <div class="ws-ring-outer"></div>
+        <div class="ws-ring-inner"></div>
+
+        <!-- Avatar image -->
+        <div class="ws-avatar">
+            <!-- Replace with your avatar image.
+           Screenshot your GLB from Sketchfab
+           or use any photo PNG. -->
+            <img src="./AIAvatar.png" alt="AR Assistant" class="ws-avatar-img" onerror="this.style.display='none';
+                    document.querySelector('.ws-avatar-emoji').style.display='flex'">
+            <!-- Fallback if no image file provided -->
+            <div class="ws-avatar-emoji">🤖</div>
+        </div>
+
+        <!-- Company name -->
+        <div class="ws-company">MindSprout Technologies</div>
+
+        <!-- Speech bubble -->
+        <div class="ws-bubble">
+            <div class="ws-bubble-header">
+                <span class="ws-bubble-dot"></span>
+                AR Assistant
+            </div>
+            <div class="ws-bubble-text" id="ws-text">
+                <span class="sb-cursor"></span>
+            </div>
+        </div>
+
+        <!-- Scan button — hidden until speech ends -->
+        <button class="ws-btn" id="ws-btn">
+            📷 &nbsp; Scan My Card
+        </button>
+
+        <!-- Hint below button -->
+        <div class="ws-hint" id="ws-hint">
+            Speaking...
+        </div>
+
+    </div>
 
     <!-- ═══════════════════════════
        A-FRAME AR SCENE
   ═══════════════════════════ -->
     <a-scene mindar-image="imageTargetSrc: ./targets.mind;
-                autoStart: true;
+                autoStart: false;
                 uiLoading: no;
                 uiScanning: no;
                 uiError: no;
@@ -116,6 +162,7 @@
             antialias: true;
             logarithmicDepthBuffer: true;" vr-mode-ui="enabled: false"
         device-orientation-permission-ui="enabled: false">
+
 
         <a-assets timeout="20000">
             <a-asset-item id="avatarModel" src="./avatar.glb" crossorigin="anonymous"></a-asset-item>
@@ -136,8 +183,9 @@
         <a-light type="point" color="#611ccf" intensity="1.2" distance="2" position="0 0.2 0.1"></a-light>
 
         <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
+
             <!-- ✅ Single wrapper — pinch scales everything together -->
-            <a-entity id="ar-content" pinch-scale="min: 0.3; max: 3.0">
+            <a-entity id="ar-content" counter-tilt pinch-scale="min: 0.3; max: 3.0">
 
                 <a-text id="speech-3d-text" value="Welcome to MindSprout" align="center" color="#7D38BC" width="2"
                     position="0 0.6 0.01"></a-text>
@@ -202,8 +250,7 @@
                 <a-sphere position=" 0.22 -0.15 0.004" radius="0.007"
                     material="color:#00e5ff;emissive:#00e5ff;emissiveIntensity:2"></a-sphere>
                 <a-light type="point" color="#00aaff" intensity="0.6" distance="0.5" position="0 0 -0.05"></a-light>
-            </a-entity> -->
-
+                </a-entity> -->
             </a-entity>
         </a-entity>
     </a-scene>
