@@ -19,6 +19,9 @@ const SPEECH_TEXT =
 
 const SPEECH_SPEED = 35;
 
+let currentUtterance = null;
+let speechUnlocked   = false;
+
 /* ══════════════════════════════════════════
    COMPONENT — pinch-scale
    Pinch two fingers to zoom in/out on mobile.
@@ -219,20 +222,39 @@ if ('speechSynthesis' in window) {
 
 function speak(text) {
   if (!('speechSynthesis' in window)) return;
+
+  // Cancel anything currently queued
   window.speechSynthesis.cancel();
 
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.rate = 1.0;
-  utt.pitch = 1.1;
-  utt.volume = 1;
+  // ✅ Assign to outer-scope variable — NOT a local const
+  // This is the iOS fix: keeps the object alive until it finishes
+  currentUtterance = new SpeechSynthesisUtterance(text);
+  currentUtterance.rate   = 1.0;
+  currentUtterance.pitch  = 1.1;
+  currentUtterance.volume = 1;
+
+  const trySpeak = () => {
+    const voices = window.speechSynthesis.getVoices();
+    const voice  = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google'))
+                || voices.find(v => v.lang.startsWith('en'))
+                || voices[0];
+    if (voice) currentUtterance.voice = voice;
+
+    // Small delay helps Android WebView reliability
+    setTimeout(() => {
+      window.speechSynthesis.speak(currentUtterance);
+    }, 50);
+  };
 
   const voices = window.speechSynthesis.getVoices();
-  const voice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google'))
-    || voices.find(v => v.lang.startsWith('en'))
-    || voices[0];
-  if (voice) utt.voice = voice;
-
-  window.speechSynthesis.speak(utt);
+  if (voices.length > 0) {
+    trySpeak();
+  } else {
+    // Voices not loaded yet — wait for them (common on first page load)
+    window.speechSynthesis.onvoiceschanged = trySpeak;
+    // Fallback in case onvoiceschanged never fires (some Android browsers)
+    setTimeout(trySpeak, 600);
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -340,6 +362,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const bubble = document.getElementById('speech-bubble');
   const arTarget = document.getElementById('ar-target');
   const scene = document.querySelector('a-scene');
+
+
+  function unlockSpeech() {
+    if (speechUnlocked || !('speechSynthesis' in window)) return;
+  
+    const unlockUtt = new SpeechSynthesisUtterance(' ');
+    unlockUtt.volume = 0;       // silent — just unlocks the engine
+    window.speechSynthesis.speak(unlockUtt);
+    speechUnlocked = true;
+  }
+  
+  // Attach to the Scan Now button — the user's first real tap
+  document.getElementById('ws-btn').addEventListener('click', unlockSpeech);
+  // Also unlock on ANY first tap, as a safety net
+  document.addEventListener('touchstart', unlockSpeech, { once: true });
+  document.addEventListener('click',      unlockSpeech, { once: true });
 
   /* ══════════════════════════════════════════
    WELCOME SCREEN — runs on page load
