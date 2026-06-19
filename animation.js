@@ -222,12 +222,8 @@ if ('speechSynthesis' in window) {
 
 function speak(text) {
   if (!('speechSynthesis' in window)) return;
-
-  // Cancel anything currently queued
   window.speechSynthesis.cancel();
 
-  // ✅ Assign to outer-scope variable — NOT a local const
-  // This is the iOS fix: keeps the object alive until it finishes
   currentUtterance = new SpeechSynthesisUtterance(text);
   currentUtterance.rate   = 1.0;
   currentUtterance.pitch  = 1.1;
@@ -239,20 +235,13 @@ function speak(text) {
                 || voices.find(v => v.lang.startsWith('en'))
                 || voices[0];
     if (voice) currentUtterance.voice = voice;
-
-    // Small delay helps Android WebView reliability
-    setTimeout(() => {
-      window.speechSynthesis.speak(currentUtterance);
-    }, 50);
+    setTimeout(() => window.speechSynthesis.speak(currentUtterance), 50);
   };
 
   const voices = window.speechSynthesis.getVoices();
-  if (voices.length > 0) {
-    trySpeak();
-  } else {
-    // Voices not loaded yet — wait for them (common on first page load)
+  if (voices.length > 0) trySpeak();
+  else {
     window.speechSynthesis.onvoiceschanged = trySpeak;
-    // Fallback in case onvoiceschanged never fires (some Android browsers)
     setTimeout(trySpeak, 600);
   }
 }
@@ -366,18 +355,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function unlockSpeech() {
     if (speechUnlocked || !('speechSynthesis' in window)) return;
-  
+
     const unlockUtt = new SpeechSynthesisUtterance(' ');
     unlockUtt.volume = 0;       // silent — just unlocks the engine
     window.speechSynthesis.speak(unlockUtt);
     speechUnlocked = true;
   }
-  
+
   // Attach to the Scan Now button — the user's first real tap
   document.getElementById('ws-btn').addEventListener('click', unlockSpeech);
   // Also unlock on ANY first tap, as a safety net
   document.addEventListener('touchstart', unlockSpeech, { once: true });
-  document.addEventListener('click',      unlockSpeech, { once: true });
+  document.addEventListener('click', unlockSpeech, { once: true });
 
   /* ══════════════════════════════════════════
    WELCOME SCREEN — runs on page load
@@ -407,43 +396,43 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('ws-btn')
     .addEventListener('click', startMindAR);
 
+  /* ══════════════════════════════════════════
+   WELCOME SCREEN — runs on page load
+══════════════════════════════════════════ */
   const wsText = document.getElementById('ws-text');
   const wsBtn = document.getElementById('ws-btn');
   const wsHint = document.getElementById('ws-hint');
 
-  // Start typewriter + TTS for welcome message
+  // 1. Start the typewriter — this is pure visual, never blocked by iOS
   typewrite(WELCOME_MSG, 'ws-text', SPEECH_SPEED);
 
-  if ('speechSynthesis' in window) {
+  // 2. Show the Scan button based on a TIMER, not on speech finishing.
+  //    This guarantees the button appears even if voice never plays.
+  const typeDuration = WELCOME_MSG.length * SPEECH_SPEED;
+  setTimeout(() => {
+    wsHint.textContent = 'Tap the button when ready';
+    wsBtn.style.display = 'block';
+  }, typeDuration + 400); // small buffer after typing finishes
+
+  // 3. Try to speak immediately too — works on Android,
+  //    silently does nothing on iOS (expected, handled in step 4)
+  speak(WELCOME_MSG);
+
+  // 4. unlockSpeech + ACTUALLY SPEAK on the first real tap.
+  //    This is what makes iOS work — speech only succeeds
+  //    when triggered directly inside a tap event.
+  function unlockSpeech() {
+    if (speechUnlocked || !('speechSynthesis' in window)) return;
+    speechUnlocked = true;
+
+    // Re-attempt the welcome message now that we have a real gesture
     window.speechSynthesis.cancel();
-    const wsUtt = new SpeechSynthesisUtterance(WELCOME_MSG);
-    wsUtt.rate = 1.0;
-    wsUtt.pitch = 1.1;
-    wsUtt.volume = 1;
-
-    // When speech ends → show Scan button
-    wsUtt.onend = () => {
-      wsHint.textContent = 'Tap the button when ready';
-      wsBtn.style.display = 'block';
-    };
-
-    // Pre-load voices then speak
-    const trySpeak = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const voice = voices.find(v =>
-        v.lang.startsWith('en') && v.name.includes('Google'))
-        || voices.find(v => v.lang.startsWith('en'))
-        || voices[0];
-      if (voice) wsUtt.voice = voice;
-      window.speechSynthesis.speak(wsUtt);
-    };
-
-    if (window.speechSynthesis.getVoices().length) {
-      trySpeak();
-    } else {
-      window.speechSynthesis.onvoiceschanged = trySpeak;
-    }
+    speak(WELCOME_MSG);
   }
+
+  wsBtn.addEventListener('click', unlockSpeech);
+  document.addEventListener('touchstart', unlockSpeech, { once: true });
+  document.addEventListener('click', unlockSpeech, { once: true });
 
   /* ── AR target found ── */
   arTarget.addEventListener('targetFound', () => {
